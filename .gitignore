@@ -1,0 +1,14 @@
+main.aux
+main.fdb_latexmk
+main.fls
+main.out
+main.log
+main.pdf
+main.synctex.gz
+main.xdv
+main.synctex*
+_minted-main/
+svg-inkscape/
+pdflatex*
+*.synctex
+*.fls

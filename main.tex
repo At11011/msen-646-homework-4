@@ -1,0 +1,80 @@
+\input{./src/main.sty}
+% Additional SI unit for Fahrenheit
+\DeclareSIUnit\fahrenheit{\degree F}
+\sisetup{range-phrase = --}
+\sisetup{range-units = single}
+
+\begin{document}
+
+% Include title page
+\input{./src/titlepage.tex}
+
+\textbf{E15.6} For the cathodic protection of a steel pipeline, the following information
+has been obtained from the potential survey shown in Table E15.1.
+
+\begin{table}[h]
+    \centering
+    \caption{PS Data}
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Parameter} & \textbf{Drain Point 1} \\
+        \hline
+        Drainage current measured, $I_\text{om}(A)$ & 16.6 \\ 
+        \hline 
+        Potential increase measured at the end of the section, $\Delta E_L (\si{\volt})$ & 0.26 \\ 
+        \hline
+        Attenuation coefficient, $\alpha \si{\per\kilo\meter}$ & 0.5 \\
+        \hline
+        Protected pipe length, $L \si{\kilo\meter}$ & 3.86 \\
+        \hline
+        Measured potential increase at the drainage point, $\Delta E_\text{om} (\si{\volt})$ & 0.83 \\
+        \hline
+        Drainage current coefficient, $k_i$ & 1.5 \\ 
+        \hline
+        Resistance of lead wire, $\rho_w (\si{\ohm \milli\meter\squared\per\meter})$ & 0.0015 \\ 
+        \hline
+        Resistance of backfill $\rho_a (\si{\ohm \milli\meter\squared\per\meter})$ & 0.0052 \\ 
+        \hline
+        Resistance of soil $\rho_s (\si{\ohm \milli\meter\squared\per\meter})$ & 0.096 \\ 
+        \hline
+        Length of lead wire $I_w (\si{\meter})$ & 375 \\ 
+        \hline
+        Length of the anode $I_a (\si{\meter})$ & 1.1 \\ 
+        \hline
+        Length of the anode with coke breeze backfill $l (\si{\meter})$ & 4.82 \\ 
+        \hline
+        Depth of the anode ground bed $t (\si{\meter})$ & 2 \\ 
+        \hline
+        Wire cross section $a (\si{\milli\meter\squared})$ & 15.5 \\ 
+        \hline
+        Radius of the backfill $d_{bf} (\si{\meter})$ & 1.25 \\ 
+        \hline
+        Radius of the anode $d_{a} (\si{\meter})$ & 0.28 \\ 
+        \hline
+        Weight of a single anode of Fe-Si, $W_{a} (\si{\kilo\gram})$ & 68 \\ 
+        \hline
+        Anode wear rate, $R (\si{\kilo\gram\per\ampere\per\year})$ & 0.07 \\ 
+        \hline
+        Accepted current per anode, $I_A (\si{\ampere})$ & 5.0 \\ 
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\begin{enumerate}[(a)]
+    \item Calculate the following parameters:
+
+        \begin{enumerate}[(1.)]
+            \item Potential at the drainage point. Compare it with the measured value
+            \item Resistance of the pipe
+            \item Current at the drainage point
+            \item Anode resistance
+            \item Number of anodes in the ground-bed
+            \item Resistence of the anode ground-bed
+            \item Lead wire resistance
+            \item Rectifier powder needed
+            \item The anode wear and cycling life of the system.
+        \end{enumerate}
+\end{enumerate}
+
+\end{document}
