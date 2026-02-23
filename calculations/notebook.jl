@@ -33,12 +33,13 @@ TableOfContents()
 begin
 	I_om = 16.6u"A" # Drainage current measured
 	ΔE_L = 0.26u"V" # Potential increase measured at the end of the section
-	α = 0.5u"km" # Attenuation coefficient
+	α = 0.5u"km^-1" # Attenuation coefficient
 	L = 3.86u"km" # Protected pipe length
 	ΔE_om = 0.83u"V" # Measured potential increase at the drainage point
 	k_i = 1.5 # Drainage current coefficient
-	ρ_w = 0.0015u"Ω*mm^2/m" # Resistance of lead wire
-	ρ_a = 0.0052u"Ω*mm^2/m" # Resistance of backfill
+	ρ_w = 1000*0.0015u"Ω*mm^2/km" # Resistance of lead wire
+	ρ_a = 1000*0.0052u"Ω*mm^2/km" # Resistance of backfill
+	ρ_s = 0.096u"Ω*mm^2/m" # Resistance of soil
 	l_w = 375u"m" # Length of lead wire
 	l_a = 1.1u"m" # Length of the anode
 	l = 4.82u"m" # Length of the anode with coke breeze backfill
@@ -55,8 +56,6 @@ end;
 md"""
 PS Data for the Cathodic Protection of a Steel Pipeline
 
-
-
 | Parameter      										| Drain Point 1 |
 | ----------------------------------------------------- | ------------	|
 | Drainage current measured 							| $I_om 		|
@@ -67,6 +66,7 @@ PS Data for the Cathodic Protection of a Steel Pipeline
 | Drainage current coefficient 							| $k_i 			|
 | Resistance of lead wire 								| $ρ_w 			|
 | Resistance of backfill 								| $ρ_a 			|
+| Resistance of soil 									| $ρ_s 			|
 | Length of lead wire 									| $l_w 			|
 | Length of the anode 									| $l_a 			|
 | Length of the anode with coke breeze backfill 		| $l 			|
@@ -78,7 +78,11 @@ PS Data for the Cathodic Protection of a Steel Pipeline
 | Anode wear rate 										| $R 			|
 | Accepted current per anode 							| $I_a 		  	|
 
+![Diagram for a pipeline anodic protection problem](https://i.imgur.com/afolkhU.png)
 """
+
+# ╔═╡ 6d8b4be9-03ef-455b-90ab-14f973e44e05
+set_handcalcs(precision=3)
 
 # ╔═╡ cab72797-398d-4bd1-9e5e-069f6d0d0151
 md"""
@@ -88,7 +92,10 @@ Determine the potential at the drainage point. Compare it with the measured valu
 """
 
 # ╔═╡ 92e66a3d-fae4-4953-8366-ba27a206a2b7
-
+@handcalcs begin
+	ΔE_oc = ΔE_L * cosh(α * L);
+	ΔE_oc > ΔE_om
+end
 
 # ╔═╡ 1909498e-4175-4bd0-9216-dfdc8a0da04d
 md"""
@@ -98,7 +105,9 @@ Determine the resistance of the pipe.
 """
 
 # ╔═╡ 4f6eefbd-2392-40dc-a666-4df08fa06efb
-
+@handcalcs begin
+	R_c = ΔE_om / I_om |> u"Ω"
+end
 
 # ╔═╡ 90a1cd96-c13b-47ac-b032-4b3c89336a4c
 md"""
@@ -107,8 +116,10 @@ md"""
 Determine the current at the drainage point.
 """
 
-# ╔═╡ 8e8b8e3d-790b-42d8-b25d-c8e4ba9a3d3a
-
+# ╔═╡ ae80a0de-8e20-4cd3-900d-d217af6ac9f7
+@handcalcs begin
+	I_oc = k_i * ΔE_oc * tanh(α * L) / R_c |> u"A"
+end
 
 # ╔═╡ ef2cc680-6780-4a0b-bd97-f61b21de2a8e
 md"""
@@ -117,8 +128,10 @@ md"""
 Determine the anode resistance.
 """
 
-# ╔═╡ 70a3e45b-956e-4328-b458-49c3ac4db12c
-
+# ╔═╡ d6605d8d-abee-4dcd-ae41-d019b2605890
+@handcalcs begin 
+	R_a = ρ_s / (2π*L) * (log(L / (2 * d_bf)) + L / (2t) - ρ_a / ρ_s + 4 * d_bf / (d_a*π)) |> u"nΩ"
+end precision = 1 len = :long
 
 # ╔═╡ 85f03ff3-e565-40df-9112-048959a432b9
 md"""
@@ -128,7 +141,18 @@ Determine the number of anodes in the ground-bed.
 """
 
 # ╔═╡ fa3882c8-0e1c-497f-9913-c19d3afe3f05
+begin
+	p5 = @handcalcs begin
+		N_a = I_oc / I_a;
+	end
+	N_a = ceil(N_a);
+	p5
+end
 
+# ╔═╡ b4cdefbd-973e-4e86-8365-fff453c24798
+@handcalcs begin
+	N_a; "Anodes"
+end
 
 # ╔═╡ 76f55ffc-1724-4835-a070-d1ba2121455e
 md"""
@@ -137,8 +161,10 @@ md"""
 Determine the resistance of the anode ground-bed.
 """
 
-# ╔═╡ 77d34169-b9bd-4911-9d33-74b9253320e6
-
+# ╔═╡ 8aa4d734-39cb-4f39-b05d-676d6dc9d2e5
+@handcalcs begin
+	R_agb = R_a / N_a
+end
 
 # ╔═╡ ac0e1dda-a433-43e7-9e5f-e99beb93a3f5
 md"""
@@ -147,8 +173,10 @@ md"""
 Determine the lead wire resistance.
 """
 
-# ╔═╡ d809dfd9-eca9-4bdc-9d03-f81949d0e8a1
-
+# ╔═╡ 35efb682-896d-47e0-aaa2-2751186616ee
+@handcalcs begin
+	R_w = ρ_w * l_w / a
+end
 
 # ╔═╡ ecdc0ff4-e860-431a-8541-3c2b17d297c5
 md"""
@@ -158,7 +186,11 @@ Determine the rectifier power needed.
 """
 
 # ╔═╡ 0f67b7fb-6487-4f3b-bccf-a5db3736054f
-
+@handcalcs begin
+	R_Tot = R_agb + R_w + R_c |> u"Ω"
+	U_r = I_oc * R_Tot |> u"V"
+	S_min = 2 * I_om * U_r |> u"W"
+end
 
 # ╔═╡ c3fbef7a-c037-415d-a728-06d4b22ba558
 md"""
@@ -168,7 +200,9 @@ Determine the anode wear and cycling life of the system.
 """
 
 # ╔═╡ 754bd7b7-f315-4d9b-bf28-d83f747f0eda
-
+@handcalcs begin
+	CL = W_a / (I_om * R)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -610,23 +644,25 @@ version = "17.7.0+0"
 # ╟─c7c8734a-f24f-4116-9596-e708a4fcf515
 # ╟─592e7f19-840a-4509-a1c6-3512db381af1
 # ╟─5c21977e-e226-400f-a5c1-b14bebfca781
+# ╟─6d8b4be9-03ef-455b-90ab-14f973e44e05
 # ╟─cab72797-398d-4bd1-9e5e-069f6d0d0151
-# ╠═92e66a3d-fae4-4953-8366-ba27a206a2b7
+# ╟─92e66a3d-fae4-4953-8366-ba27a206a2b7
 # ╟─1909498e-4175-4bd0-9216-dfdc8a0da04d
-# ╠═4f6eefbd-2392-40dc-a666-4df08fa06efb
+# ╟─4f6eefbd-2392-40dc-a666-4df08fa06efb
 # ╟─90a1cd96-c13b-47ac-b032-4b3c89336a4c
-# ╠═8e8b8e3d-790b-42d8-b25d-c8e4ba9a3d3a
+# ╟─ae80a0de-8e20-4cd3-900d-d217af6ac9f7
 # ╟─ef2cc680-6780-4a0b-bd97-f61b21de2a8e
-# ╠═70a3e45b-956e-4328-b458-49c3ac4db12c
+# ╟─d6605d8d-abee-4dcd-ae41-d019b2605890
 # ╟─85f03ff3-e565-40df-9112-048959a432b9
-# ╠═fa3882c8-0e1c-497f-9913-c19d3afe3f05
+# ╟─fa3882c8-0e1c-497f-9913-c19d3afe3f05
+# ╟─b4cdefbd-973e-4e86-8365-fff453c24798
 # ╟─76f55ffc-1724-4835-a070-d1ba2121455e
-# ╠═77d34169-b9bd-4911-9d33-74b9253320e6
+# ╟─8aa4d734-39cb-4f39-b05d-676d6dc9d2e5
 # ╟─ac0e1dda-a433-43e7-9e5f-e99beb93a3f5
-# ╠═d809dfd9-eca9-4bdc-9d03-f81949d0e8a1
+# ╟─35efb682-896d-47e0-aaa2-2751186616ee
 # ╟─ecdc0ff4-e860-431a-8541-3c2b17d297c5
-# ╠═0f67b7fb-6487-4f3b-bccf-a5db3736054f
+# ╟─0f67b7fb-6487-4f3b-bccf-a5db3736054f
 # ╟─c3fbef7a-c037-415d-a728-06d4b22ba558
-# ╠═754bd7b7-f315-4d9b-bf28-d83f747f0eda
+# ╟─754bd7b7-f315-4d9b-bf28-d83f747f0eda
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
